@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -22,13 +23,31 @@ func main() {
 			fmt.Println("error", err.Error())
 			os.Exit(1)
 		}
-		command = strings.TrimSpace(command)
 
-		if command == "exit 0" {
-			// fmt.Println(command + ": command not found")
-			os.Exit(0)
+		cmdArgs := strings.Split(strings.TrimSpace(command), " ")
+
+		cmd := cmdArgs[0]
+		args := cmdArgs[1:]
+
+
+		switch cmd {
+		case "exit":
+			returnCode := 0
+			if len(args) > 0 {
+				returnCode2, err := strconv.Atoi(args[0])
+				if err != nil {
+					fmt.Println(os.Stderr, "Error reading 'exit' command argument", err)
+					os.Exit(1)
+				}
+				returnCode = returnCode2
+			}
+			os.Exit(returnCode)
+		case "echo":
+			fmt.Println(strings.Join(args, " "))
+		default:
+			fmt.Println(command + ": command not found")
 		}
 
-		fmt.Println(command + ": command not found")
+
 	}
 }
