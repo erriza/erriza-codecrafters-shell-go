@@ -34,47 +34,64 @@ func main() {
 		cmd := cmdArgs[0]
 		args := cmdArgs[1:]
 
-
 		switch cmd {
 		case "exit":
-			returnCode := 0
-			if len(args) > 0 {
-				returnCode2, err := strconv.Atoi(args[0])
-				if err != nil {
-					fmt.Println(os.Stderr, "Error reading 'exit' command argument", err)
-					os.Exit(1)
-				}
-				returnCode = returnCode2
-			}
-			os.Exit(returnCode)
+			exitCommand(args)
 		case "echo":
-			fmt.Println(strings.Join(args, " "))
+			echoCommand(args)
 		case "type":
-			arg := args[0]
-			argDescription, ok := mapCommands[arg]
-			if ok == false {
-				fmt.Println(arg + ": not found")
-			} else {
-				fmt.Println(arg, argDescription)
-			}
-			if file, exists := findBinInPath(arg); exists {
-				fmt.Fprintf(os.Stdout, "%s is %s \n", arg, file)
-				return
-			}
+			typeCommand(args, mapCommands)
 		default:
 			fmt.Println(strings.TrimSpace(command) + ": command not found")
 		}
 	}
 }
 
+func typeCommand (args []string, mapCommands map[string]string) {
+	arg := args[0]
+
+	if desc, ok := mapCommands[arg]; ok {
+		fmt.Println(arg, desc)
+		return
+	}
+
+	if file, exists := findBinInPath(arg); exists {
+		fmt.Printf("%s is %s \n", arg, file)
+		return
+	}
+
+	fmt.Println(arg + ": not found")
+
+	
+
+}
+
 func findBinInPath(bin string) (string, bool)  {
 	paths := os.Getenv("PATH")
 	for _, path := range strings.Split(paths, ":") {
 		file := path + "/" + bin
+		// fmt.Println("test2"+ file)
 
 		if _,err := os.Stat(file); err == nil {
 			return file, true
 		}
 	}
 	return "", false
+}
+
+func exitCommand (args []string) {
+	returnCode := 0
+	if len(args) > 0 {
+		returnCode2, err := strconv.Atoi(args[0])
+		if err != nil {
+			fmt.Println(os.Stderr, "Error reading 'exit' command argument", err)
+			os.Exit(1)
+		}
+		returnCode = returnCode2
+	}
+	os.Exit(returnCode)
+}
+
+func echoCommand (args []string) {
+	fmt.Println(strings.Join(args, " "))
 }
