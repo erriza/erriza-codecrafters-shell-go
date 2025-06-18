@@ -12,7 +12,12 @@ import (
 var _ = fmt.Fprint
 
 func main() {
-	// Uncomment this block to pass the first stage
+
+	mapCommands := map[string]string {
+		"echo":"is a shell builtin",
+		"exit":"is a shell builtin",
+		"type":"is a shell builtin",
+	}
 
 	for {
 		fmt.Fprint(os.Stdout, "$ ")
@@ -44,6 +49,14 @@ func main() {
 			os.Exit(returnCode)
 		case "echo":
 			fmt.Println(strings.Join(args, " "))
+		case "type":
+			arg := args[0]
+			argDescription, ok := mapCommands[arg]
+			if ok == false {
+				fmt.Println(arg + ": not found")
+			} else {
+				fmt.Println(arg, argDescription)
+			}
 		default:
 			fmt.Println(strings.TrimSpace(command) + ": command not found")
 		}
