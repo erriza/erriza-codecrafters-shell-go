@@ -57,10 +57,24 @@ func main() {
 			} else {
 				fmt.Println(arg, argDescription)
 			}
+			if file, exists := findBinInPath(arg); exists {
+				fmt.Fprintf(os.Stdout, "%s is %s \n", arg, file)
+				return
+			}
 		default:
 			fmt.Println(strings.TrimSpace(command) + ": command not found")
 		}
-
-
 	}
+}
+
+func findBinInPath(bin string) (string, bool)  {
+	paths := os.Getenv("PATH")
+	for _, path := range strings.Split(paths, ":") {
+		file := path + "/" + bin
+
+		if _,err := os.Stat(file); err == nil {
+			return file, true
+		}
+	}
+	return "", false
 }
