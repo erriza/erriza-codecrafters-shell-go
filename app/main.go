@@ -77,6 +77,7 @@ func handleExeInPath(cmd string, args []string, file string) {
 		cmd.Stderr = os.Stderr
 		cmd.Run()
 	}
+	return
 }
 
 func findExeInPath(cmd string) (string, bool)  {
