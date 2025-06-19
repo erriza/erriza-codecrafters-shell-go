@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"os/exec"
 	"strconv"
 	"strings"
 )
@@ -42,7 +43,11 @@ func main() {
 		case "type":
 			typeCommand(args, mapCommands)
 		default:
-			fmt.Println(strings.TrimSpace(command) + ": command not found")
+			if file, ok := findBinInPath(args); ok {
+				handleExeInPath(file, args)
+			} else {
+				fmt.Println(strings.TrimSpace(command) + ": command not found")
+			}
 		}
 	}
 }
@@ -55,18 +60,30 @@ func typeCommand (args []string, mapCommands map[string]string) {
 		return
 	}
 
-	if file, exists := findBinInPath(arg); exists {
+	if file, exists := findBinInPath(args); exists {
 		fmt.Printf("%s is %s \n", arg, file)
 		return
 	}
-
 	fmt.Println(arg + ": not found")
-
-	
 
 }
 
-func findBinInPath(bin string) (string, bool)  {
+
+func handleExeInPath(file string, args []string) {
+	restArgs := args[1:]
+	arg := args[0]
+
+	if file != "" {
+		cmd := exec.Command(arg, restArgs...)
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		cmd.Run()
+	}
+}
+
+func findBinInPath(args []string) (string, bool)  {
+	bin := args[0]
+
 	paths := os.Getenv("PATH")
 	for _, path := range strings.Split(paths, ":") {
 		file := path + "/" + bin
