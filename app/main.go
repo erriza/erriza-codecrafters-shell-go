@@ -44,7 +44,6 @@ func main() {
 			typeCommand(args, mapCommands)
 		default:
 			if file, ok := findExeInPath(cmd); ok {
-				fmt.Println("Entra file ok para handleExe")
 				handleExeInPath(cmd, args, file)
 				return
 			} else {
@@ -83,11 +82,7 @@ func handleExeInPath(cmd string, args []string, file string) {
 }
 
 func findExeInPath(cmd string) (string, bool)  {
-
 	paths := os.Getenv("PATH")
-	
-	fmt.Println("exe: ", cmd)
-	fmt.Println("paths: ", paths)
 
 	for _, path := range strings.Split(paths, ":") {
 		file := path + "/" + cmd
