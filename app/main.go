@@ -43,7 +43,7 @@ func main() {
 		case "type":
 			typeCommand(args, mapCommands)
 		default:
-			if file, ok := findBinInPath(args); ok {
+			if file, ok := findExeInPath(cmd); ok {
 				fmt.Println("Entra file ok para handleExe")
 				handleExeInPath(file, args)
 				return
@@ -83,10 +83,28 @@ func handleExeInPath(file string, args []string) {
 	}
 }
 
+func findExeInPath(cmd string) (string, bool)  {
+
+	paths := os.Getenv("PATH")
+	
+	fmt.Println("exe: ", cmd)
+	fmt.Println("paths: ", paths)
+
+	for _, path := range strings.Split(paths, ":") {
+		file := path + "/" + cmd
+
+		if _,err := os.Stat(file); err == nil {
+			return file, true
+		}
+	}
+	return "", false
+}
+
 func findBinInPath(args []string) (string, bool)  {
 	bin := args[0]
 
 	paths := os.Getenv("PATH")
+	fmt.Println("full: ", args)
 	fmt.Println("exe: ", bin)
 	fmt.Println("paths: ", paths)
 
