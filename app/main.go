@@ -70,10 +70,9 @@ func typeCommand (args []string, mapCommands map[string]string) {
 }
 
 func handleExeInPath(cmd string, args []string, file string) {
-	restArgs := args[1:]
 
 	if file != "" {
-		cmd := exec.Command(cmd, restArgs...)
+		cmd := exec.Command(cmd, args...)
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 		cmd.Run()
