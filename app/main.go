@@ -121,5 +121,17 @@ func exitCommand (args []string) {
 }
 
 func echoCommand (args []string) {
-	fmt.Println(strings.Join(args, " "))
+	unquoted := make([]string, 0, len(args))
+
+	for _, arg := range args {
+		// Remove surrounding single or double quotes if present
+		if len(arg) >= 2 {
+			if (arg[0] == '"' && arg[len(arg)-1] == '"') || (arg[0] == '\'' && arg[len(arg)-1] == '\'') {
+				arg = arg[1 : len(arg)-1]
+			}
+		}
+		unquoted = append(unquoted, arg)
+	}
+
+	fmt.Println(strings.Join(unquoted, " "))
 }
