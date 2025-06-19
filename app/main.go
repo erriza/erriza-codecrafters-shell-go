@@ -72,7 +72,6 @@ func typeCommand (args []string, mapCommands map[string]string) {
 func handleExeInPath(cmd string, args []string, file string) {
 	restArgs := args[1:]
 
-	fmt.Println("cmd:", cmd, restArgs)
 	if file != "" {
 		cmd := exec.Command(cmd, restArgs...)
 		cmd.Stdout = os.Stdout
