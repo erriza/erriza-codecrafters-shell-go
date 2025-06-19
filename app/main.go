@@ -30,7 +30,12 @@ func main() {
 			os.Exit(1)
 		}
 
-		cmdArgs := strings.Split(strings.TrimSpace(command), " ")
+		// cmdArgs := strings.Split(strings.TrimSpace(command), " ")
+		cmdArgs, err := parseArgs(command)
+		if err != nil {
+			fmt.Println("error parsing arguments", err)
+			continue
+		}
 
 		cmd := cmdArgs[0]
 		args := cmdArgs[1:]
@@ -134,4 +139,48 @@ func echoCommand (args []string) {
 	}
 
 	fmt.Println(strings.Join(unquoted, " "))
+}
+
+func parseArgs(input string) ([]string , error){
+	scanner := bufio.NewScanner(strings.NewReader(input))
+	scanner.Split(bufio.ScanWords)
+
+	words := []string{}
+	current := ""
+	inQuote := false
+	var quoteChar rune
+
+	for _, ch := range input {
+		switch ch {
+		case ' ', '\t':
+			if inQuote {
+				current += string(ch)
+			} else if current != "" {
+				words = append(words, current)
+				current = ""
+			}
+		case '\'', '"':
+			if inQuote && ch == quoteChar {
+				inQuote = false
+				words = append(words, current)
+				current = ""
+			} else if !inQuote {
+				inQuote = true
+				quoteChar = ch
+			} else {
+				current += string(ch)
+			}
+		default:
+			current += string(ch)
+		}
+	}
+
+	if current != "" {
+		words = append(words, current)
+	}
+
+	if inQuote {
+		return nil, fmt.Errorf("uncloused quote in input")
+	}
+	return words, nil
 }
