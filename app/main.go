@@ -87,6 +87,9 @@ func findBinInPath(args []string) (string, bool)  {
 	bin := args[0]
 
 	paths := os.Getenv("PATH")
+	fmt.Println("exe: ", bin)
+	fmt.Println("paths: ", paths)
+
 	for _, path := range strings.Split(paths, ":") {
 		file := path + "/" + bin
 
