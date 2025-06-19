@@ -45,7 +45,7 @@ func main() {
 		default:
 			if file, ok := findExeInPath(cmd); ok {
 				fmt.Println("Entra file ok para handleExe")
-				handleExeInPath(file, args)
+				handleExeInPath(cmd, args, file)
 				return
 			} else {
 				fmt.Println(strings.TrimSpace(command) + ": command not found")
@@ -70,13 +70,12 @@ func typeCommand (args []string, mapCommands map[string]string) {
 
 }
 
-func handleExeInPath(file string, args []string) {
+func handleExeInPath(cmd string, args []string, file string) {
 	restArgs := args[1:]
-	arg := args[0]
 
-	fmt.Println("cmd:", arg, restArgs)
+	fmt.Println("cmd:", cmd, restArgs)
 	if file != "" {
-		cmd := exec.Command(arg, restArgs...)
+		cmd := exec.Command(cmd, restArgs...)
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 		cmd.Run()
