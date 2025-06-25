@@ -139,38 +139,48 @@ func echoCommand (args []string) {
 }
 
 func parseCommand(input string) []string {
-	var result []string
-	var current strings.Builder
-	inQuotes := false
-
-	for i, char := range input {
-		if char == '\'' {
-			if inQuotes {
-				//End of quoted section
-				inQuotes = false
-			} else {
-				//start of quoted section
-				inQuotes = true
-			}
-		} else if char == ' ' && !inQuotes {
-			//space outside quotes - end current argument
-			if current.Len() > 0 {
-				result = append(result, current.String())	
-				current.Reset()
-			}
-
-			// skip consecutive spaces
-			for i+1 < len(input) && input[i+1] == ' ' {
-				i++
-			}
-		} else {
-			current.WriteRune(char)
-		}
-	}
-
-	//add last argument if there is one
-	if current.Len() > 0 {
-		result = append(result, current.String())
-	}
-	return result
+    var result []string
+    var current strings.Builder
+    var quoteChar rune = 0 // 0 means not in quotes, '\'' or '"' means in quotes
+    
+    for i := 0; i < len(input); i++ {
+        char := rune(input[i])
+        
+        if quoteChar == 0 {
+            // Not currently in quotes
+            if char == '\'' || char == '"' {
+                // Start of quoted section
+                quoteChar = char
+            } else if char == ' ' {
+                // Space outside quotes - end current argument
+                if current.Len() > 0 {
+                    result = append(result, current.String())
+                    current.Reset()
+                }
+                // Skip consecutive spaces
+                for i+1 < len(input) && input[i+1] == ' ' {
+                    i++
+                }
+            } else {
+                // Regular character outside quotes
+                current.WriteRune(char)
+            }
+        } else {
+            // Currently in quotes
+            if char == quoteChar {
+                // End of quoted section
+                quoteChar = 0
+            } else {
+                // Character inside quotes (treated literally)
+                current.WriteRune(char)
+            }
+        }
+    }
+    
+    // Add the last argument if there is one
+    if current.Len() > 0 {
+        result = append(result, current.String())
+    }
+    
+    return result
 }
