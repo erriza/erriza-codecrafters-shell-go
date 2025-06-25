@@ -31,9 +31,9 @@ func main() {
 		}
 
 		// cmdArgs := strings.Split(strings.TrimSpace(command), " ")
-		cmdArgs, err := parseArgs(command)
-		if err != nil {
-			fmt.Println("error parsing arguments", err)
+		cmdArgs := parseCommand(strings.TrimSpace(command))
+		
+		if len(cmdArgs) == 0 {
 			continue
 		}
 
@@ -58,6 +58,10 @@ func main() {
 }
 
 func typeCommand (args []string, mapCommands map[string]string) {
+	if len(args) == 0 {
+		return
+	}
+
 	arg := args[0]
 
 	if desc, ok := mapCommands[arg]; ok {
@@ -98,6 +102,10 @@ func findExeInPath(cmd string) (string, bool)  {
 }
 
 func findBinInPath(args []string) (string, bool)  {
+	if len(args) == 0 {
+		return "", false
+	}
+
 	bin := args[0]
 
 	paths := os.Getenv("PATH")
@@ -126,61 +134,43 @@ func exitCommand (args []string) {
 }
 
 func echoCommand (args []string) {
-	unquoted := make([]string, 0, len(args))
-
-	for _, arg := range args {
-		// Remove surrounding single or double quotes if present
-		if len(arg) >= 2 {
-			if (arg[0] == '"' && arg[len(arg)-1] == '"') || (arg[0] == '\'' && arg[len(arg)-1] == '\'') {
-				arg = arg[1 : len(arg)-1]
-			}
-		}
-		unquoted = append(unquoted, arg)
-	}
-
-	fmt.Println(strings.Join(unquoted, " "))
+	
+	fmt.Println(strings.Join(args, " "))
 }
 
-func parseArgs(input string) ([]string , error){
-	scanner := bufio.NewScanner(strings.NewReader(input))
-	scanner.Split(bufio.ScanWords)
+func parseCommand(input string) []string {
+	var result []string
+	var current strings.Builder
+	inQuotes := false
 
-	words := []string{}
-	current := ""
-	inQuote := false
-	var quoteChar rune
-
-	for _, ch := range input {
-		switch ch {
-		case ' ', '\t':
-			if inQuote {
-				current += string(ch)
-			} else if current != "" {
-				words = append(words, current)
-				current = ""
-			}
-		case '\'', '"':
-			if inQuote && ch == quoteChar {
-				inQuote = false
-				words = append(words, current)
-				current = ""
-			} else if !inQuote {
-				inQuote = true
-				quoteChar = ch
+	for i, char := range input {
+		if char == '\'' {
+			if inQuotes {
+				//End of quoted section
+				inQuotes = false
 			} else {
-				current += string(ch)
+				//start of quoted section
+				inQuotes = true
 			}
-		default:
-			current += string(ch)
+		} else if char == ' ' && !inQuotes {
+			//space outside quotes - end current argument
+			if current.Len() > 0 {
+				result = append(result, current.String())	
+				current.Reset()
+			}
+
+			// skip consecutive spaces
+			for i+1 < len(input) && input[i+1] == ' ' {
+				i++
+			}
+		} else {
+			current.WriteRune(char)
 		}
 	}
 
-	if current != "" {
-		words = append(words, current)
+	//add last argument if there is one
+	if current.Len() > 0 {
+		result = append(result, current.String())
 	}
-
-	if inQuote {
-		return nil, fmt.Errorf("uncloused quote in input")
-	}
-	return words, nil
+	return result
 }
