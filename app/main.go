@@ -146,7 +146,19 @@ func parseCommand(input string) []string {
     for i := 0; i < len(input); i++ {
         char := rune(input[i])
         
-        if quoteChar == 0 {
+
+		if quoteChar == '\'' {
+			// inside single quotes everything is literall
+			if char == '\'' {
+				quoteChar = 0
+			} else {
+				current.WriteRune(char)
+			}
+		} else if char == '\\' && i+1 < len(input) {
+			i++ // skip backslash
+			nextChat := rune(input[i])
+			current.WriteRune(nextChat) // Add the escaped char
+		} else if quoteChar == 0 {
             // Not currently in quotes
             if char == '\'' || char == '"' {
                 // Start of quoted section
@@ -182,5 +194,5 @@ func parseCommand(input string) []string {
         result = append(result, current.String())
     }
     
-    return result
+	return result
 }
