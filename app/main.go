@@ -154,40 +154,36 @@ func parseCommand(input string) []string {
 			} else {
 				current.WriteRune(char)
 			}
+		} else if quoteChar == '"' {
+			// inside double quotes - backslashes are literal for now
+			if char == '"' {
+				quoteChar = 0
+			} else {
+				current.WriteRune(char)
+			}
 		} else if char == '\\' && i+1 < len(input) {
+			// backslashes escape (only when outside quotes)
 			i++ // skip backslash
 			nextChat := rune(input[i])
 			current.WriteRune(nextChat) // Add the escaped char
-		} else if quoteChar == 0 {
-            // Not currently in quotes
-            if char == '\'' || char == '"' {
+		} else if char == '\'' || char == '"' {
                 // Start of quoted section
                 quoteChar = char
-            } else if char == ' ' {
+		} else if char == ' ' {
                 // Space outside quotes - end current argument
-                if current.Len() > 0 {
-                    result = append(result, current.String())
-                    current.Reset()
-                }
-                // Skip consecutive spaces
-                for i+1 < len(input) && input[i+1] == ' ' {
-                    i++
-                }
-            } else {
-                // Regular character outside quotes
-                current.WriteRune(char)
+            if current.Len() > 0 {
+                result = append(result, current.String())
+                current.Reset()
+            }
+            // Skip consecutive spaces
+            for i+1 < len(input) && input[i+1] == ' ' {
+                i++
             }
         } else {
-            // Currently in quotes
-            if char == quoteChar {
-                // End of quoted section
-                quoteChar = 0
-            } else {
-                // Character inside quotes (treated literally)
-                current.WriteRune(char)
-            }
+            // Regular character outside quotes
+            current.WriteRune(char)
         }
-    }
+    } 
     
     // Add the last argument if there is one
     if current.Len() > 0 {
